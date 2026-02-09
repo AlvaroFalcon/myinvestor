@@ -5,6 +5,7 @@ import { Dialog } from '../../../common/components/dialog';
 import { CurrencyInput } from '../../../common/components/currency-input';
 import { buySchema, type BuyFormData } from '../../../common/utils/validators';
 import { fundsApi } from '../api/funds';
+import { useOrders } from '../../portfolio/context/orders-context';
 import type { Fund } from '../../../api/types';
 
 interface BuyDialogProps {
@@ -15,6 +16,7 @@ interface BuyDialogProps {
 }
 
 export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) {
+  const { addOrder } = useOrders();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -44,6 +46,12 @@ export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) 
 
     try {
       await fundsApi.buyFund(fund.id, { quantity: data.quantity });
+      addOrder({
+        type: 'buy',
+        fundId: fund.id,
+        fundName: fund.name,
+        quantity: data.quantity,
+      });
       onSuccess();
       handleClose();
     } catch (error) {

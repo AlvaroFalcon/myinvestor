@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { usePortfolio } from '../context/portfolio-context';
 import { SwipeableItem } from '../../../common/components/swipeable-item';
 import { SellDialog } from './sell-dialog';
+import { TransferDialog } from './transfer-dialog';
+import { OrderHistory } from './order-history';
 import { formatCurrency, formatPercentage } from '../../../common/utils/formatters';
 import { CATEGORY_LABELS } from '../../../common/utils/constants';
 import type { FundCategory, PortfolioItem } from '../../../api/types';
@@ -13,6 +15,7 @@ export function Portfolio() {
   const [activeTab, setActiveTab] = useState<Tab>('holdings');
   const [selectedHolding, setSelectedHolding] = useState<PortfolioItem | null>(null);
   const [isSellDialogOpen, setIsSellDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
 
   useEffect(() => {
     refreshPortfolio();
@@ -24,6 +27,15 @@ export function Portfolio() {
   };
 
   const handleSellSuccess = () => {
+    refreshPortfolio();
+  };
+
+  const handleTransferClick = (holding: PortfolioItem) => {
+    setSelectedHolding(holding);
+    setIsTransferDialogOpen(true);
+  };
+
+  const handleTransferSuccess = () => {
     refreshPortfolio();
   };
 
@@ -115,7 +127,10 @@ export function Portfolio() {
                               >
                                 Vender
                               </button>
-                              <button className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md">
+                              <button
+                                onClick={() => handleTransferClick(item)}
+                                className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md"
+                              >
                                 Traspasar
                               </button>
                             </>
@@ -199,7 +214,10 @@ export function Portfolio() {
                           >
                             Vender
                           </button>
-                          <button className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                          <button
+                            onClick={() => handleTransferClick(item)}
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
                             Traspasar
                           </button>
                         </div>
@@ -213,17 +231,21 @@ export function Portfolio() {
         </>
       )}
 
-      {activeTab === 'orders' && (
-        <div className="bg-white shadow-md rounded-lg p-8 text-center">
-          <p className="text-gray-500">Historial de órdenes próximamente</p>
-        </div>
-      )}
+      {activeTab === 'orders' && <OrderHistory />}
 
       <SellDialog
         isOpen={isSellDialogOpen}
         onClose={() => setIsSellDialogOpen(false)}
         holding={selectedHolding}
         onSuccess={handleSellSuccess}
+      />
+
+      <TransferDialog
+        isOpen={isTransferDialogOpen}
+        onClose={() => setIsTransferDialogOpen(false)}
+        holding={selectedHolding}
+        availableHoldings={portfolio}
+        onSuccess={handleTransferSuccess}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FundList } from './features/funds/components/fund-list';
 import { Portfolio } from './features/portfolio/components/portfolio';
 import { PortfolioProvider } from './features/portfolio/context/portfolio-context';
+import { OrdersProvider } from './features/portfolio/context/orders-context';
 
 type Tab = 'funds' | 'portfolio';
 
@@ -9,8 +10,9 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('funds');
 
   return (
-    <PortfolioProvider>
-      <div className="min-h-screen bg-gray-50">
+    <OrdersProvider>
+      <PortfolioProvider>
+        <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 py-6">MyInvestor</h1>
@@ -49,7 +51,8 @@ function App() {
         {activeTab === 'portfolio' && <Portfolio />}
       </main>
     </div>
-    </PortfolioProvider>
+      </PortfolioProvider>
+    </OrdersProvider>
   );
 }
 

@@ -5,6 +5,7 @@ import { Dialog } from '../../../common/components/dialog';
 import { CurrencyInput } from '../../../common/components/currency-input';
 import { createSellSchema, type SellFormData } from '../../../common/utils/validators';
 import { fundsApi } from '../../funds/api/funds';
+import { useOrders } from '../context/orders-context';
 import type { PortfolioItem } from '../../../api/types';
 
 interface SellDialogProps {
@@ -15,6 +16,7 @@ interface SellDialogProps {
 }
 
 export function SellDialog({ isOpen, onClose, holding, onSuccess }: SellDialogProps) {
+  const { addOrder } = useOrders();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -46,6 +48,12 @@ export function SellDialog({ isOpen, onClose, holding, onSuccess }: SellDialogPr
 
     try {
       await fundsApi.sellFund(holding.fund.id, { quantity: data.quantity });
+      addOrder({
+        type: 'sell',
+        fundId: holding.fund.id,
+        fundName: holding.fund.name,
+        quantity: data.quantity,
+      });
       onSuccess();
       handleClose();
     } catch (error) {
