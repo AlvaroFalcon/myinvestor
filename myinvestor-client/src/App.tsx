@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FundList } from './components/funds/FundList';
+import { FundList } from './components/funds/fund-list';
 
 type Tab = 'funds' | 'portfolio';
 
