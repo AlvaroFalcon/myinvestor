@@ -1,12 +1,18 @@
 import { apiClient } from './client';
-import type { PortfolioResponse, TransferRequest, SuccessResponse } from './types';
+import {
+  portfolioResponseSchema,
+  successResponseSchema,
+  type PortfolioResponse,
+  type TransferRequest,
+  type SuccessResponse
+} from './types';
 
 export const portfolioApi = {
   async getPortfolio(): Promise<PortfolioResponse> {
-    return apiClient.get<PortfolioResponse>('/portfolio');
+    return apiClient.get('/portfolio', portfolioResponseSchema);
   },
 
   async transferFunds(data: TransferRequest): Promise<SuccessResponse> {
-    return apiClient.post<SuccessResponse>('/funds/transfer', data);
+    return apiClient.post('/funds/transfer', successResponseSchema, data);
   },
 };

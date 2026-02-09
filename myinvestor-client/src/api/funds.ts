@@ -1,12 +1,15 @@
 import { apiClient } from './client';
-import type {
-  FundsResponse,
-  Fund,
-  BuyRequest,
-  SellRequest,
-  SuccessResponse,
-  SortDirection,
-  SortField
+import {
+  fundsResponseSchema,
+  fundSchema,
+  successResponseSchema,
+  type FundsResponse,
+  type Fund,
+  type BuyRequest,
+  type SellRequest,
+  type SuccessResponse,
+  type SortDirection,
+  type SortField
 } from './types';
 
 export interface GetFundsParams {
@@ -27,18 +30,18 @@ export const fundsApi = {
       searchParams.append('sort', sort);
     }
 
-    return apiClient.get<FundsResponse>(`/funds?${searchParams.toString()}`);
+    return apiClient.get(`/funds?${searchParams.toString()}`, fundsResponseSchema);
   },
 
   async getFund(id: string): Promise<Fund> {
-    return apiClient.get<Fund>(`/funds/${id}`);
+    return apiClient.get(`/funds/${id}`, fundSchema);
   },
 
   async buyFund(id: string, data: BuyRequest): Promise<SuccessResponse> {
-    return apiClient.post<SuccessResponse>(`/funds/${id}/buy`, data);
+    return apiClient.post(`/funds/${id}/buy`, successResponseSchema, data);
   },
 
   async sellFund(id: string, data: SellRequest): Promise<SuccessResponse> {
-    return apiClient.post<SuccessResponse>(`/funds/${id}/sell`, data);
+    return apiClient.post(`/funds/${id}/sell`, successResponseSchema, data);
   },
 };

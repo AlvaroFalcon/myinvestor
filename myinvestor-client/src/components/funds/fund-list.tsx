@@ -2,27 +2,39 @@ import { useState, useEffect } from 'react';
 import { fundsApi } from '../../api/funds';
 import type { Fund } from '../../api/types';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import { Pagination } from '../common/pagination';
+import { DEFAULT_PAGE_SIZE } from '../../utils/constants';
 
 export function FundList() {
   const [funds, setFunds] = useState<Fund[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     loadFunds();
-  }, []);
+  }, [currentPage]);
 
   const loadFunds = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fundsApi.getFunds({ page: 1, limit: 10 });
+      const response = await fundsApi.getFunds({
+        page: currentPage,
+        limit: DEFAULT_PAGE_SIZE
+      });
       setFunds(response.data);
+      setTotalPages(response.pagination.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading funds');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   if (loading) {
@@ -99,6 +111,11 @@ export function FundList() {
           ))}
         </tbody>
       </table>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
