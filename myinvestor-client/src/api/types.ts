@@ -18,6 +18,10 @@ export const fundSchema = z.object({
   }),
 });
 
+export const fundResponseSchema = z.object({
+  data: fundSchema,
+});
+
 export const fundsResponseSchema = z.object({
   pagination: z.object({
     page: z.number(),
@@ -30,8 +34,8 @@ export const fundsResponseSchema = z.object({
 
 export const portfolioItemSchema = z.object({
   id: z.string(),
+  name: z.string(),
   quantity: z.number(),
-  fund: fundSchema,
   totalValue: z.number(),
 });
 
@@ -51,9 +55,17 @@ export const apiErrorSchema = z.object({
 export type FundCategory = z.infer<typeof fundCategorySchema>;
 export type Currency = z.infer<typeof currencySchema>;
 export type Fund = z.infer<typeof fundSchema>;
+export type FundResponse = z.infer<typeof fundResponseSchema>;
 export type FundsResponse = z.infer<typeof fundsResponseSchema>;
 export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
 export type PortfolioResponse = z.infer<typeof portfolioResponseSchema>;
+
+export interface EnrichedPortfolioItem {
+  id: string;
+  quantity: number;
+  fund: Fund;
+  totalValue: number;
+}
 export type SuccessResponse<T = unknown> = {
   message?: string;
   data?: T;

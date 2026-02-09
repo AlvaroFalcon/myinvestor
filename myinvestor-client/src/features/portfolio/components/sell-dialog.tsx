@@ -6,12 +6,12 @@ import { CurrencyInput } from '../../../common/components/currency-input';
 import { createSellSchema, type SellFormData } from '../../../common/utils/validators';
 import { fundsApi } from '../../funds/api/funds';
 import { useOrders } from '../context/orders-context';
-import type { PortfolioItem } from '../../../api/types';
+import type { EnrichedPortfolioItem } from '../../../api/types';
 
 interface SellDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  holding: PortfolioItem | null;
+  holding: EnrichedPortfolioItem | null;
   onSuccess: () => void;
 }
 

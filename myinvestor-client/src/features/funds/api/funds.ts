@@ -1,7 +1,7 @@
 import { apiClient } from '../../../api/client';
 import {
   fundsResponseSchema,
-  fundSchema,
+  fundResponseSchema,
   successResponseSchema,
   type FundsResponse,
   type Fund,
@@ -34,7 +34,8 @@ export const fundsApi = {
   },
 
   async getFund(id: string): Promise<Fund> {
-    return apiClient.get(`/funds/${id}`, fundSchema);
+    const response = await apiClient.get(`/funds/${id}`, fundResponseSchema);
+    return response.data;
   },
 
   async buyFund(id: string, data: BuyRequest): Promise<SuccessResponse> {

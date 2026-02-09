@@ -6,14 +6,14 @@ import { TransferDialog } from './transfer-dialog';
 import { OrderHistory } from './order-history';
 import { formatCurrency, formatPercentage } from '../../../common/utils/formatters';
 import { CATEGORY_LABELS } from '../../../common/utils/constants';
-import type { FundCategory, PortfolioItem } from '../../../api/types';
+import type { FundCategory, EnrichedPortfolioItem } from '../../../api/types';
 
 type Tab = 'holdings' | 'orders';
 
 export function Portfolio() {
   const { portfolio, loading, error, refreshPortfolio } = usePortfolio();
   const [activeTab, setActiveTab] = useState<Tab>('holdings');
-  const [selectedHolding, setSelectedHolding] = useState<PortfolioItem | null>(null);
+  const [selectedHolding, setSelectedHolding] = useState<EnrichedPortfolioItem | null>(null);
   const [isSellDialogOpen, setIsSellDialogOpen] = useState(false);
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
 
@@ -21,7 +21,7 @@ export function Portfolio() {
     refreshPortfolio();
   }, [refreshPortfolio]);
 
-  const handleSellClick = (holding: PortfolioItem) => {
+  const handleSellClick = (holding: EnrichedPortfolioItem) => {
     setSelectedHolding(holding);
     setIsSellDialogOpen(true);
   };
@@ -30,7 +30,7 @@ export function Portfolio() {
     refreshPortfolio();
   };
 
-  const handleTransferClick = (holding: PortfolioItem) => {
+  const handleTransferClick = (holding: EnrichedPortfolioItem) => {
     setSelectedHolding(holding);
     setIsTransferDialogOpen(true);
   };

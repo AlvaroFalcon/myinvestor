@@ -6,13 +6,13 @@ import { CurrencyInput } from '../../../common/components/currency-input';
 import { createTransferSchema, type TransferFormData } from '../../../common/utils/validators';
 import { portfolioApi } from '../api/portfolio';
 import { useOrders } from '../context/orders-context';
-import type { PortfolioItem } from '../../../api/types';
+import type { EnrichedPortfolioItem } from '../../../api/types';
 
 interface TransferDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  holding: PortfolioItem | null;
-  availableHoldings: PortfolioItem[];
+  holding: EnrichedPortfolioItem | null;
+  availableHoldings: EnrichedPortfolioItem[];
   onSuccess: () => void;
 }
 
@@ -96,7 +96,7 @@ export function TransferDialog({ isOpen, onClose, holding, availableHoldings, on
             Desde: <span className="font-semibold">{holding.fund.name}</span>
           </p>
           <p className="text-sm text-gray-600">
-            Unidades disponibles: <span className="font-semibold">{holding.quantity.toLocaleCompare('es-ES', { maximumFractionDigits: 2 })}</span>
+            Unidades disponibles: <span className="font-semibold">{holding.quantity.toLocaleString('es-ES', { maximumFractionDigits: 2 })}</span>
           </p>
         </div>
 

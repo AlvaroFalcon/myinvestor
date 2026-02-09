@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { portfolioApi } from '../api/portfolio';
-import type { PortfolioItem } from '../../../api/types';
+import { fundsApi } from '../../funds/api/funds';
+import type { EnrichedPortfolioItem } from '../../../api/types';
 
 interface PortfolioContextValue {
-  portfolio: PortfolioItem[];
+  portfolio: EnrichedPortfolioItem[];
   loading: boolean;
   error: string | null;
   refreshPortfolio: () => Promise<void>;
@@ -12,7 +13,7 @@ interface PortfolioContextValue {
 const PortfolioContext = createContext<PortfolioContextValue | null>(null);
 
 export function PortfolioProvider({ children }: { children: ReactNode }) {
-  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [portfolio, setPortfolio] = useState<EnrichedPortfolioItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +23,20 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await portfolioApi.getPortfolio();
-      setPortfolio(response.data);
+
+      const enrichedPortfolio = await Promise.all(
+        response.data.map(async (item) => {
+          const fund = await fundsApi.getFund(item.id);
+          return {
+            id: item.id,
+            quantity: item.quantity,
+            totalValue: item.totalValue,
+            fund,
+          };
+        })
+      );
+
+      setPortfolio(enrichedPortfolio);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading portfolio');
     } finally {
