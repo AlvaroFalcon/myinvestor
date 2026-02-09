@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fundsApi } from '../../api/funds';
-import type { Fund } from '../../api/types';
+import type { Fund, SortField, SortDirection } from '../../api/types';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 import { Pagination } from '../common/pagination';
 import { DEFAULT_PAGE_SIZE } from '../../utils/constants';
@@ -11,10 +11,12 @@ export function FundList() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   useEffect(() => {
     loadFunds();
-  }, [currentPage]);
+  }, [currentPage, sortField, sortDirection]);
 
   const loadFunds = async () => {
     try {
@@ -22,7 +24,8 @@ export function FundList() {
       setError(null);
       const response = await fundsApi.getFunds({
         page: currentPage,
-        limit: DEFAULT_PAGE_SIZE
+        limit: DEFAULT_PAGE_SIZE,
+        sort: sortField ? `${sortField}:${sortDirection}` : undefined,
       });
       setFunds(response.data);
       setTotalPages(response.pagination.totalPages);
@@ -35,6 +38,38 @@ export function FundList() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    if (sortDirection === 'asc') {
+      return (
+        <svg className="w-4 h-4 ml-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-4 h-4 ml-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
   };
 
   if (loading) {
@@ -59,19 +94,43 @@ export function FundList() {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Nombre
+              <button
+                onClick={() => handleSort('name')}
+                className="flex items-center hover:text-gray-700 transition-colors"
+              >
+                Nombre
+                {renderSortIcon('name')}
+              </button>
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Símbolo
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Valor
+              <button
+                onClick={() => handleSort('value')}
+                className="flex items-center ml-auto hover:text-gray-700 transition-colors"
+              >
+                Valor
+                {renderSortIcon('value')}
+              </button>
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              YTD
+              <button
+                onClick={() => handleSort('profitability.YTD')}
+                className="flex items-center ml-auto hover:text-gray-700 transition-colors"
+              >
+                YTD
+                {renderSortIcon('profitability.YTD')}
+              </button>
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              1 Año
+              <button
+                onClick={() => handleSort('profitability.oneYear')}
+                className="flex items-center ml-auto hover:text-gray-700 transition-colors"
+              >
+                1 Año
+                {renderSortIcon('profitability.oneYear')}
+              </button>
             </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
