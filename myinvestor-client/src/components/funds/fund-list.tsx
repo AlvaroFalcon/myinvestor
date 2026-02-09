@@ -89,8 +89,9 @@ export function FundList() {
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div>
+      <div className="hidden md:block bg-white shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -176,5 +177,52 @@ export function FundList() {
         onPageChange={handlePageChange}
       />
     </div>
+
+    <div className="md:hidden space-y-4">
+      {funds.map((fund) => (
+        <div key={fund.id} className="bg-white shadow-md rounded-lg p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">{fund.name}</h3>
+              <p className="text-sm text-gray-500">{fund.symbol}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-gray-900">
+                {formatCurrency(fund.value, fund.currency)}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase">YTD</p>
+              <p className={`text-sm font-semibold ${
+                fund.profitability.YTD >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatPercentage(fund.profitability.YTD)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase">1 Año</p>
+              <p className={`text-sm font-semibold ${
+                fund.profitability.oneYear >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatPercentage(fund.profitability.oneYear)}
+              </p>
+            </div>
+          </div>
+
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+            Comprar
+          </button>
+        </div>
+      ))}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+    </div>
+  </div>
   );
 }
