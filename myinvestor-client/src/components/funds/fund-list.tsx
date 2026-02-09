@@ -3,6 +3,7 @@ import { fundsApi } from '../../api/funds';
 import type { Fund, SortField, SortDirection } from '../../api/types';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 import { Pagination } from '../common/pagination';
+import { BuyDialog } from './buy-dialog';
 import { DEFAULT_PAGE_SIZE } from '../../utils/constants';
 
 export function FundList() {
@@ -13,6 +14,8 @@ export function FundList() {
   const [totalPages, setTotalPages] = useState(1);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
+  const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
 
   useEffect(() => {
     loadFunds();
@@ -48,6 +51,15 @@ export function FundList() {
       setSortDirection('asc');
     }
     setCurrentPage(1);
+  };
+
+  const handleBuyClick = (fund: Fund) => {
+    setSelectedFund(fund);
+    setIsBuyDialogOpen(true);
+  };
+
+  const handleBuySuccess = () => {
+    loadFunds();
   };
 
   const renderSortIcon = (field: SortField) => {
@@ -162,6 +174,7 @@ export function FundList() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                 <button
+                  onClick={() => handleBuyClick(fund)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
                 >
                   Comprar
@@ -212,7 +225,10 @@ export function FundList() {
             </div>
           </div>
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+          <button
+            onClick={() => handleBuyClick(fund)}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+          >
             Comprar
           </button>
         </div>
@@ -223,6 +239,13 @@ export function FundList() {
         onPageChange={handlePageChange}
       />
     </div>
+
+    <BuyDialog
+      isOpen={isBuyDialogOpen}
+      onClose={() => setIsBuyDialogOpen(false)}
+      fund={selectedFund}
+      onSuccess={handleBuySuccess}
+    />
   </div>
   );
 }
