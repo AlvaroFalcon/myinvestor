@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { fundsApi } from '../../api/funds';
-import type { Fund, SortField, SortDirection } from '../../api/types';
-import { formatCurrency, formatPercentage } from '../../utils/formatters';
-import { Pagination } from '../common/pagination';
+import { fundsApi } from '../api/funds';
+import type { Fund, SortField, SortDirection } from '../../../api/types';
+import { formatCurrency, formatPercentage } from '../../../common/utils/formatters';
+import { Pagination } from '../../../common/components/pagination';
 import { BuyDialog } from './buy-dialog';
-import { DEFAULT_PAGE_SIZE } from '../../utils/constants';
+import { usePortfolio } from '../../portfolio/context/portfolio-context';
+import { DEFAULT_PAGE_SIZE } from '../../../common/utils/constants';
 
 export function FundList() {
+  const { refreshPortfolio } = usePortfolio();
   const [funds, setFunds] = useState<Fund[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function FundList() {
   };
 
   const handleBuySuccess = () => {
-    loadFunds();
+    refreshPortfolio();
   };
 
   const renderSortIcon = (field: SortField) => {

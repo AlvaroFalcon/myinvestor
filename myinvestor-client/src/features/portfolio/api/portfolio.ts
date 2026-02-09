@@ -1,11 +1,11 @@
-import { apiClient } from './client';
+import { apiClient } from '../../../api/client';
 import {
   portfolioResponseSchema,
   successResponseSchema,
   type PortfolioResponse,
   type TransferRequest,
   type SuccessResponse
-} from './types';
+} from '../../../api/types';
 
 export const portfolioApi = {
   async getPortfolio(): Promise<PortfolioResponse> {

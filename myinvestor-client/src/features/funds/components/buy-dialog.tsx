@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dialog } from '../common/dialog';
-import { CurrencyInput } from '../common/currency-input';
-import { buySchema, type BuyFormData } from '../../utils/validators';
-import { fundsApi } from '../../api/funds';
-import type { Fund } from '../../api/types';
+import { Dialog } from '../../../common/components/dialog';
+import { CurrencyInput } from '../../../common/components/currency-input';
+import { buySchema, type BuyFormData } from '../../../common/utils/validators';
+import { fundsApi } from '../api/funds';
+import type { Fund } from '../../../api/types';
 
 interface BuyDialogProps {
   isOpen: boolean;

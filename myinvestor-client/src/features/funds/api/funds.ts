@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from '../../../api/client';
 import {
   fundsResponseSchema,
   fundSchema,
@@ -10,7 +10,7 @@ import {
   type SuccessResponse,
   type SortDirection,
   type SortField
-} from './types';
+} from '../../../api/types';
 
 export interface GetFundsParams {
   page?: number;
