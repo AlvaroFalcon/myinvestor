@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog } from '../common/dialog';
 import { CurrencyInput } from '../common/currency-input';
 import { buySchema, type BuyFormData } from '../../utils/validators';
+import { fundsApi } from '../../api/funds';
 import type { Fund } from '../../api/types';
 
 interface BuyDialogProps {
@@ -15,6 +16,7 @@ interface BuyDialogProps {
 
 export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     control,
@@ -30,6 +32,7 @@ export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) 
 
   const handleClose = () => {
     reset();
+    setApiError(null);
     onClose();
   };
 
@@ -37,13 +40,14 @@ export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) 
     if (!fund) return;
 
     setIsSubmitting(true);
+    setApiError(null);
+
     try {
-      console.log('Buying fund:', fund.id, 'Quantity:', data.quantity);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await fundsApi.buyFund(fund.id, { quantity: data.quantity });
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error('Error buying fund:', error);
+      setApiError(error instanceof Error ? error.message : 'Error al comprar el fondo');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,6 +78,12 @@ export function BuyDialog({ isOpen, onClose, fund, onSuccess }: BuyDialogProps) 
             />
           )}
         />
+
+        {apiError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+            {apiError}
+          </div>
+        )}
 
         <div className="flex gap-3 pt-4">
           <button
