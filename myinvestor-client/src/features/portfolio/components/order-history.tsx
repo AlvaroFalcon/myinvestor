@@ -1,4 +1,5 @@
-import { useOrders, type OrderType } from '../../../common/context/orders-context';
+import type { ReactNode } from 'react';
+import { useOrders, type Order, type OrderType } from '../../../common/context/orders-context';
 
 const ORDER_TYPE_LABELS: Record<OrderType, string> = {
   buy: 'Compra',
@@ -11,6 +12,18 @@ const ORDER_TYPE_COLORS: Record<OrderType, string> = {
   sell: 'text-red-600',
   transfer: 'text-blue-600',
 };
+
+function renderFundName(order: Order): ReactNode {
+  if (order.type === 'transfer') {
+    return (
+      <>
+        <div>{order.fromFundName}</div>
+        <div className="text-xs text-gray-500">→ {order.toFundName}</div>
+      </>
+    );
+  }
+  return order.fundName;
+}
 
 export function OrderHistory() {
   const { orders } = useOrders();
@@ -57,14 +70,7 @@ export function OrderHistory() {
                   })}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  {order.type === 'transfer' ? (
-                    <>
-                      <div>{order.fromFundName}</div>
-                      <div className="text-xs text-gray-500">→ {order.toFundName}</div>
-                    </>
-                  ) : (
-                    order.fundName
-                  )}
+                  {renderFundName(order)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={`font-semibold ${ORDER_TYPE_COLORS[order.type]}`}>
@@ -103,14 +109,7 @@ export function OrderHistory() {
               </p>
             </div>
             <div className="text-sm text-gray-900">
-              {order.type === 'transfer' ? (
-                <>
-                  <div>{order.fromFundName}</div>
-                  <div className="text-xs text-gray-500">→ {order.toFundName}</div>
-                </>
-              ) : (
-                order.fundName
-              )}
+              {renderFundName(order)}
             </div>
           </div>
         ))}

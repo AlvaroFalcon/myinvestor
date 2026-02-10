@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, type ReactNode } from 'react';
 import { usePortfolio } from '../context/portfolio-context';
 import { SwipeableItem } from '../../../common/components/swipeable-item';
 import { SellDialog } from './sell-dialog';
@@ -76,6 +76,140 @@ export function Portfolio() {
     return { groupedHoldings: grouped, sortedCategories: sorted };
   }, [portfolio]);
 
+  function renderHoldings(): ReactNode {
+    if (portfolio.length === 0) {
+      return (
+        <div className="bg-white shadow-md rounded-lg p-8 text-center">
+          <p className="text-gray-500">No tienes fondos en tu cartera</p>
+          <p className="text-sm text-gray-400 mt-2">Comienza comprando fondos desde la lista</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {sortedCategories.map(category => (
+          <div key={category} className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-700 uppercase">
+                {CATEGORY_LABELS[category]}
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {groupedHoldings[category].map(item => (
+                <div key={item.id} className="md:hidden">
+                  <SwipeableItem
+                    actions={
+                      <>
+                        <button
+                          onClick={() => handleSellClick(item)}
+                          className="px-4 py-2 text-sm bg-red-500 text-white rounded-md"
+                        >
+                          Vender
+                        </button>
+                        <button
+                          onClick={() => handleTransferClick(item)}
+                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md"
+                        >
+                          Traspasar
+                        </button>
+                      </>
+                    }
+                  >
+                    <div className="px-6 py-4 bg-white">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-gray-900">{item.fund.name}</h4>
+                          <p className="text-xs text-gray-500 mt-1">{item.fund.symbol}</p>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(item.totalValue, item.fund.currency)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {item.quantity.toLocaleString('es-ES', { maximumFractionDigits: 2 })} unidades
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500">YTD</p>
+                          <p className={`text-sm font-semibold ${
+                            item.fund.profitability.YTD >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {formatPercentage(item.fund.profitability.YTD)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">1 Año</p>
+                          <p className={`text-sm font-semibold ${
+                            item.fund.profitability.oneYear >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {formatPercentage(item.fund.profitability.oneYear)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </SwipeableItem>
+                </div>
+              ))}
+              {groupedHoldings[category].map(item => (
+                <div key={`desktop-${item.id}`} className="hidden md:block px-6 py-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-gray-900">{item.fund.name}</h4>
+                      <p className="text-xs text-gray-500 mt-1">{item.fund.symbol}</p>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {formatCurrency(item.totalValue, item.fund.currency)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.quantity.toLocaleString('es-ES', { maximumFractionDigits: 2 })} unidades
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">YTD</p>
+                      <p className={`text-sm font-semibold ${
+                        item.fund.profitability.YTD >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {formatPercentage(item.fund.profitability.YTD)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">1 Año</p>
+                      <p className={`text-sm font-semibold ${
+                        item.fund.profitability.oneYear >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {formatPercentage(item.fund.profitability.oneYear)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={() => handleSellClick(item)}
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Vender
+                    </button>
+                    <button
+                      onClick={() => handleTransferClick(item)}
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Traspasar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="bg-white border-b border-gray-200 mb-6">
@@ -103,137 +237,7 @@ export function Portfolio() {
         </div>
       </div>
 
-      {activeTab === 'holdings' && (
-        <>
-          {portfolio.length === 0 ? (
-            <div className="bg-white shadow-md rounded-lg p-8 text-center">
-              <p className="text-gray-500">No tienes fondos en tu cartera</p>
-              <p className="text-sm text-gray-400 mt-2">Comienza comprando fondos desde la lista</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {sortedCategories.map(category => (
-                <div key={category} className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase">
-                      {CATEGORY_LABELS[category]}
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-gray-200">
-                    {groupedHoldings[category].map(item => (
-                      <div key={item.id} className="md:hidden">
-                        <SwipeableItem
-                          actions={
-                            <>
-                              <button
-                                onClick={() => handleSellClick(item)}
-                                className="px-4 py-2 text-sm bg-red-500 text-white rounded-md"
-                              >
-                                Vender
-                              </button>
-                              <button
-                                onClick={() => handleTransferClick(item)}
-                                className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md"
-                              >
-                                Traspasar
-                              </button>
-                            </>
-                          }
-                        >
-                          <div className="px-6 py-4 bg-white">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <h4 className="text-sm font-semibold text-gray-900">{item.fund.name}</h4>
-                                <p className="text-xs text-gray-500 mt-1">{item.fund.symbol}</p>
-                              </div>
-                              <div className="text-right ml-4">
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {formatCurrency(item.totalValue, item.fund.currency)}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {item.quantity.toLocaleString('es-ES', { maximumFractionDigits: 2 })} unidades
-                                </p>
-                              </div>
-                            </div>
-                            <div className="mt-3 grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-xs text-gray-500">YTD</p>
-                                <p className={`text-sm font-semibold ${
-                                  item.fund.profitability.YTD >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {formatPercentage(item.fund.profitability.YTD)}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500">1 Año</p>
-                                <p className={`text-sm font-semibold ${
-                                  item.fund.profitability.oneYear >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {formatPercentage(item.fund.profitability.oneYear)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </SwipeableItem>
-                      </div>
-                    ))}
-                    {groupedHoldings[category].map(item => (
-                      <div key={`desktop-${item.id}`} className="hidden md:block px-6 py-4 hover:bg-gray-50">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="text-sm font-semibold text-gray-900">{item.fund.name}</h4>
-                            <p className="text-xs text-gray-500 mt-1">{item.fund.symbol}</p>
-                          </div>
-                          <div className="text-right ml-4">
-                            <p className="text-sm font-semibold text-gray-900">
-                              {formatCurrency(item.totalValue, item.fund.currency)}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {item.quantity.toLocaleString('es-ES', { maximumFractionDigits: 2 })} unidades
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-3 grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-xs text-gray-500">YTD</p>
-                            <p className={`text-sm font-semibold ${
-                              item.fund.profitability.YTD >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {formatPercentage(item.fund.profitability.YTD)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">1 Año</p>
-                            <p className={`text-sm font-semibold ${
-                              item.fund.profitability.oneYear >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {formatPercentage(item.fund.profitability.oneYear)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <button
-                            onClick={() => handleSellClick(item)}
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            Vender
-                          </button>
-                          <button
-                            onClick={() => handleTransferClick(item)}
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            Traspasar
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      {activeTab === 'holdings' && renderHoldings()}
 
       {activeTab === 'orders' && <OrderHistory />}
 
