@@ -1,4 +1,4 @@
-import { useOrders, type OrderType } from '../context/orders-context';
+import { useOrders, type OrderType } from '../../../common/context/orders-context';
 
 const ORDER_TYPE_LABELS: Record<OrderType, string> = {
   buy: 'Compra',

@@ -22,11 +22,18 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const response = await portfolioApi.getPortfolio();
+      const [portfolioResponse, fundsResponse] = await Promise.all([
+        portfolioApi.getPortfolio(),
+        fundsApi.getFunds({ page: 1, limit: 100 }),
+      ]);
 
-      const enrichedPortfolio = await Promise.all(
-        response.data.map(async (item) => {
-          const fund = await fundsApi.getFund(item.id);
+      const fundsMap = new Map(fundsResponse.data.map(fund => [fund.id, fund]));
+
+      const enrichedPortfolio = portfolioResponse.data
+        .map((item) => {
+          const fund = fundsMap.get(item.id);
+          if (!fund) return null;
+
           return {
             id: item.id,
             quantity: item.quantity,
@@ -34,7 +41,7 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
             fund,
           };
         })
-      );
+        .filter((item): item is EnrichedPortfolioItem => item !== null);
 
       setPortfolio(enrichedPortfolio);
     } catch (err) {

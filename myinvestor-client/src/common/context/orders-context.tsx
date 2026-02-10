@@ -27,18 +27,18 @@ const OrdersContext = createContext<OrdersContextValue | null>(null);
 const STORAGE_KEY = 'myinvestor_orders';
 
 export function OrdersProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  useEffect(() => {
+  const [orders, setOrders] = useState<Order[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setOrders(JSON.parse(stored));
+        return JSON.parse(stored);
       } catch (error) {
         console.error('Error loading orders from localStorage:', error);
+        return [];
       }
     }
-  }, []);
+    return [];
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));

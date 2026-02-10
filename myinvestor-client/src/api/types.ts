@@ -43,10 +43,14 @@ export const portfolioResponseSchema = z.object({
   data: z.array(portfolioItemSchema),
 });
 
-export const successResponseSchema = z.object({
-  message: z.string().optional(),
-  data: z.unknown().optional(),
-});
+export const createSuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema?: T) => {
+  return z.object({
+    message: z.string().optional(),
+    data: dataSchema ? dataSchema.optional() : z.unknown().optional(),
+  });
+};
+
+export const successResponseSchema = createSuccessResponseSchema();
 
 export const apiErrorSchema = z.object({
   error: z.string(),

@@ -5,7 +5,7 @@ import { Dialog } from '../../../common/components/dialog';
 import { CurrencyInput } from '../../../common/components/currency-input';
 import { buySchema, type BuyFormData } from '../../../common/utils/validators';
 import { fundsApi } from '../api/funds';
-import { useOrders } from '../../portfolio/context/orders-context';
+import { useOrders } from '../../../common/context/orders-context';
 import type { Fund } from '../../../api/types';
 
 interface BuyDialogProps {

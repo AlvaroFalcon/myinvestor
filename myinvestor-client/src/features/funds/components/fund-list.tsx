@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fundsApi } from '../api/funds';
 import type { Fund, SortField, SortDirection } from '../../../api/types';
 import { formatCurrency, formatPercentage } from '../../../common/utils/formatters';
@@ -19,11 +19,7 @@ export function FundList() {
   const [selectedFund, setSelectedFund] = useState<Fund | null>(null);
   const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
 
-  useEffect(() => {
-    loadFunds();
-  }, [currentPage, sortField, sortDirection]);
-
-  const loadFunds = async () => {
+  const loadFunds = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -39,7 +35,11 @@ export function FundList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, sortField, sortDirection]);
+
+  useEffect(() => {
+    loadFunds();
+  }, [loadFunds]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -62,6 +62,11 @@ export function FundList() {
 
   const handleBuySuccess = () => {
     refreshPortfolio();
+  };
+
+  const getAriaSort = (field: SortField): 'ascending' | 'descending' | 'none' => {
+    if (sortField !== field) return 'none';
+    return sortDirection === 'asc' ? 'ascending' : 'descending';
   };
 
   const renderSortIcon = (field: SortField) => {
@@ -89,7 +94,7 @@ export function FundList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" role="status" aria-label="Cargando fondos"></div>
       </div>
     );
   }
@@ -108,7 +113,7 @@ export function FundList() {
         <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" aria-sort={getAriaSort('name')}>
               <button
                 onClick={() => handleSort('name')}
                 className="flex items-center hover:text-gray-700 transition-colors"
@@ -120,7 +125,7 @@ export function FundList() {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Símbolo
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" aria-sort={getAriaSort('value')}>
               <button
                 onClick={() => handleSort('value')}
                 className="flex items-center ml-auto hover:text-gray-700 transition-colors"
@@ -129,7 +134,7 @@ export function FundList() {
                 {renderSortIcon('value')}
               </button>
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" aria-sort={getAriaSort('profitability.YTD')}>
               <button
                 onClick={() => handleSort('profitability.YTD')}
                 className="flex items-center ml-auto hover:text-gray-700 transition-colors"
@@ -138,7 +143,7 @@ export function FundList() {
                 {renderSortIcon('profitability.YTD')}
               </button>
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" aria-sort={getAriaSort('profitability.oneYear')}>
               <button
                 onClick={() => handleSort('profitability.oneYear')}
                 className="flex items-center ml-auto hover:text-gray-700 transition-colors"

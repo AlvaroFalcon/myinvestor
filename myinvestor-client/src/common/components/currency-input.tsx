@@ -25,6 +25,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
     };
 
     const displayValue = value === 0 ? '' : value.toString().replace('.', ',');
+    const errorId = error ? `${props.id || 'currency-input'}-error` : undefined;
 
     return (
       <div className="w-full">
@@ -40,6 +41,8 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
             inputMode="decimal"
             value={displayValue}
             onChange={handleChange}
+            aria-describedby={errorId}
+            aria-invalid={error ? 'true' : 'false'}
             className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               error
                 ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
@@ -52,7 +55,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
           </div>
         </div>
         {error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
+          <p id={errorId} className="mt-1 text-sm text-red-600">{error}</p>
         )}
         {value > 0 && !error && (
           <p className="mt-1 text-sm text-gray-500">

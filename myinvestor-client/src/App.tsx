@@ -1,10 +1,20 @@
-import { useState } from 'react';
-import { FundList } from './features/funds/components/fund-list';
-import { Portfolio } from './features/portfolio/components/portfolio';
+import { useState, lazy, Suspense } from 'react';
 import { PortfolioProvider } from './features/portfolio/context/portfolio-context';
-import { OrdersProvider } from './features/portfolio/context/orders-context';
+import { OrdersProvider } from './common/context/orders-context';
+import { ErrorBoundary } from './common/components/error-boundary';
+
+const FundList = lazy(() => import('./features/funds/components/fund-list').then(module => ({ default: module.FundList })));
+const Portfolio = lazy(() => import('./features/portfolio/components/portfolio').then(module => ({ default: module.Portfolio })));
 
 type Tab = 'funds' | 'portfolio';
+
+function LoadingFallback() {
+  return (
+    <div className="flex justify-center items-center py-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" role="status" aria-label="Cargando"></div>
+    </div>
+  );
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('funds');
@@ -47,8 +57,16 @@ function App() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'funds' && <FundList />}
-        {activeTab === 'portfolio' && <Portfolio />}
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            {activeTab === 'funds' && <FundList />}
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            {activeTab === 'portfolio' && <Portfolio />}
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </div>
       </PortfolioProvider>

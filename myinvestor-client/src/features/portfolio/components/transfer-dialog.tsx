@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog } from '../../../common/components/dialog';
 import { CurrencyInput } from '../../../common/components/currency-input';
 import { createTransferSchema, type TransferFormData } from '../../../common/utils/validators';
 import { portfolioApi } from '../api/portfolio';
-import { useOrders } from '../context/orders-context';
+import { useOrders } from '../../../common/context/orders-context';
 import type { EnrichedPortfolioItem } from '../../../api/types';
 
 interface TransferDialogProps {
@@ -21,7 +21,10 @@ export function TransferDialog({ isOpen, onClose, holding, availableHoldings, on
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const transferSchema = holding ? createTransferSchema(holding.quantity) : createTransferSchema(0);
+  const transferSchema = useMemo(
+    () => holding ? createTransferSchema(holding.quantity) : createTransferSchema(0),
+    [holding]
+  );
 
   const {
     control,
@@ -110,6 +113,8 @@ export function TransferDialog({ isOpen, onClose, holding, availableHoldings, on
             render={({ field }) => (
               <select
                 {...field}
+                aria-describedby={errors.toFundId ? 'toFundId-error' : undefined}
+                aria-invalid={errors.toFundId ? 'true' : 'false'}
                 className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.toFundId
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
@@ -126,7 +131,7 @@ export function TransferDialog({ isOpen, onClose, holding, availableHoldings, on
             )}
           />
           {errors.toFundId && (
-            <p className="mt-1 text-sm text-red-600">{errors.toFundId.message}</p>
+            <p id="toFundId-error" className="mt-1 text-sm text-red-600">{errors.toFundId.message}</p>
           )}
         </div>
 

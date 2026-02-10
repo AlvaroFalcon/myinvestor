@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef } from 'react';
 
 interface SwipeHandlers {
   onSwipeLeft?: () => void;
@@ -12,29 +12,29 @@ interface SwipeableReturn {
 }
 
 export function useSwipeable(handlers: SwipeHandlers): SwipeableReturn {
-  const [touchStart, setTouchStart] = useState<number>(0);
-  const [touchEnd, setTouchEnd] = useState<number>(0);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStart = useRef<number>(0);
+  const touchEnd = useRef<number>(0);
+  const isSwiping = useRef<boolean>(false);
 
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(0);
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsSwiping(true);
+    touchEnd.current = 0;
+    touchStart.current = e.targetTouches[0].clientX;
+    isSwiping.current = true;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEnd.current = e.targetTouches[0].clientX;
   };
 
   const onTouchEnd = () => {
-    if (!isSwiping) return;
-    setIsSwiping(false);
+    if (!isSwiping.current) return;
+    isSwiping.current = false;
 
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart.current || !touchEnd.current) return;
 
-    const distance = touchStart - touchEnd;
+    const distance = touchStart.current - touchEnd.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 

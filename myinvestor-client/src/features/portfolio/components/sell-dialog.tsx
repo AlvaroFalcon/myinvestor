@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog } from '../../../common/components/dialog';
 import { CurrencyInput } from '../../../common/components/currency-input';
 import { createSellSchema, type SellFormData } from '../../../common/utils/validators';
 import { fundsApi } from '../../funds/api/funds';
-import { useOrders } from '../context/orders-context';
+import { useOrders } from '../../../common/context/orders-context';
 import type { EnrichedPortfolioItem } from '../../../api/types';
 
 interface SellDialogProps {
@@ -20,7 +20,10 @@ export function SellDialog({ isOpen, onClose, holding, onSuccess }: SellDialogPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const sellSchema = holding ? createSellSchema(holding.quantity) : createSellSchema(0);
+  const sellSchema = useMemo(
+    () => holding ? createSellSchema(holding.quantity) : createSellSchema(0),
+    [holding]
+  );
 
   const {
     control,

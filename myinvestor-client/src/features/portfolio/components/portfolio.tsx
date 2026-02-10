@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePortfolio } from '../context/portfolio-context';
 import { SwipeableItem } from '../../../common/components/swipeable-item';
 import { SellDialog } from './sell-dialog';
@@ -42,7 +42,7 @@ export function Portfolio() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" role="status" aria-label="Cargando cartera"></div>
       </div>
     );
   }
@@ -55,22 +55,26 @@ export function Portfolio() {
     );
   }
 
-  const groupedHoldings = portfolio.reduce((acc, item) => {
-    const category = item.fund.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {} as Record<FundCategory, typeof portfolio>);
+  const { groupedHoldings, sortedCategories } = useMemo(() => {
+    const grouped = portfolio.reduce((acc, item) => {
+      const category = item.fund.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    }, {} as Record<FundCategory, typeof portfolio>);
 
-  const sortedCategories = Object.keys(groupedHoldings).sort() as FundCategory[];
+    const sorted = Object.keys(grouped).sort() as FundCategory[];
 
-  sortedCategories.forEach(category => {
-    groupedHoldings[category].sort((a, b) =>
-      a.fund.name.localeCompare(b.fund.name, 'es')
-    );
-  });
+    sorted.forEach(category => {
+      grouped[category].sort((a, b) =>
+        a.fund.name.localeCompare(b.fund.name, 'es')
+      );
+    });
+
+    return { groupedHoldings: grouped, sortedCategories: sorted };
+  }, [portfolio]);
 
   return (
     <div>
