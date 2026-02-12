@@ -1,73 +1,127 @@
-# React + TypeScript + Vite
+# MyInvestor Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicacion front-end desarrollada en React para gestionar fondos de inversion. Permite consultar un catalogo de fondos, comprar participaciones, gestionar un portfolio personal y realizar traspasos entre fondos.
 
-Currently, two official plugins are available:
+## Como correr el proyecto localmente
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Requisitos previos
 
-## React Compiler
+- Node.js (v18+)
+- Yarn
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Levantar el servidor
 
-## Expanding the ESLint configuration
+Desde la raiz del proyecto:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+yarn start
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Esto inicia:
+- API REST en `http://localhost:3000`
+- Documentacion Swagger en `http://localhost:3001/api-docs`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 2. Levantar el cliente
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd myinvestor-client
+yarn install
+yarn dev
 ```
+
+El cliente se levanta por defecto en `http://localhost:5173`.
+
+### 3. Comandos disponibles
+
+| Comando              | Descripcion                        |
+|----------------------|------------------------------------|
+| `yarn dev`           | Servidor de desarrollo con HMR     |
+| `yarn build`         | Compila TypeScript y genera build  |
+| `yarn lint`          | Ejecuta ESLint                     |
+| `yarn test`          | Ejecuta tests con Vitest           |
+| `yarn test:ui`       | Tests con interfaz visual          |
+| `yarn test:coverage` | Tests con reporte de cobertura     |
+
+## Decisiones tecnicas
+
+### Stack
+
+- **React 19** con **TypeScript 5.9** en modo estricto (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`)
+- **Vite 7** como bundler y servidor de desarrollo
+- **Tailwind CSS 3.4** para estilos, sin librerias de componentes externas
+- **react-hook-form** con **Zod** para formularios con validacion en tiempo real
+- **Vitest** + **Testing Library** para tests unitarios
+
+### Arquitectura (Screaming Architecture)
+
+```
+src/
+├── api/              # Cliente HTTP base con validacion Zod
+├── common/           # Componentes y utilidades reutilizables
+├── features/
+│   ├── funds/        # Listado de fondos y compra
+│   └── portfolio/    # Cartera, venta, traspasos e historial
+├── app.tsx
+└── main.tsx
+```
+
+Cada feature agrupa sus propios componentes, llamadas API y contexto. Las features no importan entre si; solo comparten lo que esta en `common/` y `api/`.
+
+### Otras decisiones relevantes
+
+- **Validacion con Zod en toda la capa API**: todas las respuestas del servidor se validan en runtime con schemas Zod, garantizando seguridad de tipos tanto en compilacion como en ejecucion.
+- **HTML `<dialog>` nativo**: los modales usan el elemento `<dialog>` del navegador en vez de librerias externas, con soporte para cierre por backdrop y tecla ESC.
+- **Lazy loading**: los componentes principales (`FundList`, `Portfolio`) se cargan de forma diferida con `React.lazy` y `Suspense`.
+- **Context API para estado**: `PortfolioContext` gestiona el estado de la cartera con enrichment de datos (join portfolio + fondos). `OrdersContext` persiste el historial de ordenes en `localStorage`.
+- **Cero dependencias de UI**: todos los componentes (Dialog, Pagination, CurrencyInput, SwipeableItem) estan construidos desde cero con Tailwind.
+- **Internacionalizacion**: interfaz en espanol con formato `es-ES` para moneda, porcentajes y fechas.
+
+## Funcionalidades implementadas
+
+### Listado de fondos
+- Tabla paginada con 10 fondos por pagina
+- Ordenacion por columnas (nombre, valor, rentabilidad YTD y 1 ano)
+- Diseno responsive: tabla en escritorio, tarjetas en movil
+- Boton de compra por cada fondo
+
+### Compra de fondos (BuyDialog)
+- Input de cantidad con formato de moneda (separador decimal con coma)
+- Validacion: maximo 10.000 EUR, sin valores negativos
+- Registro automatico de la orden en el historial
+
+### Cartera (Portfolio)
+- Vista con dos pestanas: Posiciones y Ordenes
+- Holdings agrupados por categoria del fondo (GLOBAL, TECH, HEALTH, MONEY_MARKET)
+- Ordenacion alfabetica dentro de cada categoria
+- Responsive: tarjetas con swipe en movil, tabla con botones en escritorio
+
+### Venta de fondos (SellDialog)
+- Validacion dinamica segun las participaciones actuales
+- Muestra cantidad disponible y valor del fondo
+
+### Traspasos (TransferDialog)
+- Selector de fondo destino (excluye el fondo origen)
+- Validacion de cantidad segun las participaciones disponibles
+- Registro con detalle completo (fondo origen y destino)
+
+### Historial de ordenes (OrderHistory)
+- Log de todas las operaciones (compra, venta, traspaso)
+- Codigo de color por tipo de operacion
+- Persistencia en localStorage
+
+### Componentes comunes
+- **CurrencyInput**: input numerico con formato de moneda y `inputMode="decimal"`
+- **Pagination**: paginacion inteligente con elipsis y navegacion movil simplificada
+- **SwipeableItem**: gestos tactiles para revelar acciones en movil
+- **ErrorBoundary**: captura de errores con fallback visual
+
+## Que mejoraria con mas tiempo
+
+- **Tests de integracion**: ampliar la cobertura con tests e2e usando Playwright o Cypress para cubrir flujos completos de compra, venta y traspaso.
+- **Gestion de estado mas robusta**: evaluar React Query (TanStack Query) para manejar cache, revalidacion y estados de carga/error de forma declarativa.
+- **Accesibilidad (a11y)**: auditoria completa con herramientas como axe-core, mejorar navegacion por teclado y soporte de lectores de pantalla.
+- **Animaciones y transiciones**: agregar transiciones suaves entre vistas y feedback visual en las acciones del usuario.
+- **Filtros y busqueda**: permitir filtrar fondos por categoria, moneda o nombre.
+- **Manejo de errores global**: implementar un sistema de notificaciones (toasts) para feedback de exito y error en las operaciones.
+- **Modo oscuro**: aprovechar la configuracion de Tailwind para agregar soporte de tema oscuro.
+- **Internacionalizacion completa**: usar una libreria como `react-intl` o `i18next` para gestionar traducciones de forma escalable en vez de strings hardcodeados.

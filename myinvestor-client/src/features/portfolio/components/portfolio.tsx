@@ -21,6 +21,27 @@ export function Portfolio() {
     refreshPortfolio();
   }, [refreshPortfolio]);
 
+  const { groupedHoldings, sortedCategories } = useMemo(() => {
+    const grouped = portfolio.reduce((acc, item) => {
+      const category = item.fund.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    }, {} as Record<FundCategory, typeof portfolio>);
+
+    const sorted = Object.keys(grouped).sort() as FundCategory[];
+
+    sorted.forEach(category => {
+      grouped[category].sort((a, b) =>
+        a.fund.name.localeCompare(b.fund.name, 'es')
+      );
+    });
+
+    return { groupedHoldings: grouped, sortedCategories: sorted };
+  }, [portfolio]);
+
   const handleSellClick = (holding: EnrichedPortfolioItem) => {
     setSelectedHolding(holding);
     setIsSellDialogOpen(true);
@@ -54,27 +75,6 @@ export function Portfolio() {
       </div>
     );
   }
-
-  const { groupedHoldings, sortedCategories } = useMemo(() => {
-    const grouped = portfolio.reduce((acc, item) => {
-      const category = item.fund.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(item);
-      return acc;
-    }, {} as Record<FundCategory, typeof portfolio>);
-
-    const sorted = Object.keys(grouped).sort() as FundCategory[];
-
-    sorted.forEach(category => {
-      grouped[category].sort((a, b) =>
-        a.fund.name.localeCompare(b.fund.name, 'es')
-      );
-    });
-
-    return { groupedHoldings: grouped, sortedCategories: sorted };
-  }, [portfolio]);
 
   function renderHoldings(): ReactNode {
     if (portfolio.length === 0) {
